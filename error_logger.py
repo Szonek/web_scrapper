@@ -1,4 +1,7 @@
 import sys
+import logging
+
+
 class Logger:
     """
     Error logger.
@@ -17,5 +20,17 @@ class Logger:
     @staticmethod
     def CHECK_IF_NONE(e):
         if e is None:
+            Logger.__advanced_log("Object is none.")
             sys.exit(1)
 
+    @staticmethod
+    def __advanced_log(message):
+        """
+        Automatically log the current function details.
+        !!! WORK IN PROGRESS. THIS FUNCTION SHOULB BE SOME KIND OF INLINE FUNCTION !!!
+        """
+        logger = logging.getLogger('root')
+        err_format = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        logging.basicConfig(format=err_format)
+        logger.setLevel(logging.DEBUG)
+        logger.debug(message)

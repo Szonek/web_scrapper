@@ -13,8 +13,6 @@ for p in html.select('p'):
     if p['id'] == "walrus":
         print(p.text)
 
-
-
 raw_html = HtmlGetter.simple_get("http://kwejk.pl")
 html = BeautifulSoup(raw_html, 'html.parser')
 for i, li, in enumerate(html.select("li")):

@@ -1,3 +1,4 @@
+import sys
 class Logger:
     """
     Error logger.
@@ -12,3 +13,9 @@ class Logger:
         """
         print(e)
         pass
+
+    @staticmethod
+    def CHECK_IF_NONE(e):
+        if e is None:
+            sys.exit(1)
+

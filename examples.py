@@ -1,24 +1,5 @@
-from html_getter import HtmlGetter
-from bs4 import BeautifulSoup
+import parsers
 
-# https://realpython.com/python-web-scraping-practical-introduction/
 
-raw_html = HtmlGetter.simple_get('https://realpython.com/blog/')
-print(len(raw_html))
-print(raw_html)
-
-raw_html = open("test_content\contrived.html").read()
-html = BeautifulSoup(raw_html, 'html.parser')
-for p in html.select('p'):
-    if p['id'] == "walrus":
-        print(p.text)
-
-raw_html = HtmlGetter.simple_get("http://kwejk.pl")
-html = BeautifulSoup(raw_html, 'html.parser')
-for i, li, in enumerate(html.select("li")):
-    print(str(i) + str(li.text))
-
-raw_html = HtmlGetter.simple_get("http://fabpedigree.com/james/mathmen.htm")
-html = BeautifulSoup(raw_html, 'html.parser')
-for i, li, in enumerate(html.select("li")):
-    print(str(i) + str(li.text))
+kwejk_parser = parsers.KwejkParser("C:\\Users\\szymon\\Desktop\memestok\\temp_folder")
+kwejk_parser.download_memes()

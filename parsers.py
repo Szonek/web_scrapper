@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 from html_getter import HtmlGetter
 from error_logger import Logger
 
-
 class ParsersInterface:
     """
     Base class (interface) of all meme parsers.
@@ -11,15 +10,20 @@ class ParsersInterface:
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, url):
-        self.web_page_name = name
-        self.web_page_url = url
-        self.memes_per_page = 0
-        self.raw_html = None
-        self.pretty_html = None
+    def __init__(self, name, url, path_on_disk):
+        self._web_page_name = name
+        self._web_page_url = url
+        self._path_on_disk = path_on_disk
+        self._raw_html = None
+        self._pretty_html = None
 
     @abstractmethod
-    def download_memes(self): raise NotImplementedError
+    def download_memes(self):
+        """
+        Virtual function. All parsers have to implement own download_function.
+        It should download memes from whole (if possible) page.
+        """
+        raise NotImplementedError
 
     def _raw_and_pretty_html_setter(self):
         """
@@ -59,16 +63,32 @@ class ParsersInterface:
                 out.append(attr[attribute])
         return out
 
+    def _save_image_from_url(self, web_url, file_name):
+        image_raw = HtmlGetter.simple_get(web_url)
+        with open(self.path_on_disk + "\\" + file_name, 'wb') as f:
+            f.write(image_raw)
+
+    def _split_url(self, memes_urls, character):
+        """
+        Split url by "/" character.
+        Example: "http://kwejk.pl"   -> ["http", "", "kwejk.pl"]
+        :param memes_urls: 1D array of urls.
+        :return: Splitted array of urls. Returns 2D array.
+        """
+        splited_urls = []
+        for i in range(len(memes_urls)):
+            splited_urls.append(memes_urls[i].split(character))
+        return splited_urls
+
 
 class KwejkParser(ParsersInterface):
     """
     Kwejk parser.
     """
-    def __init__(self):
+    def __init__(self, path_on_disk):
         self.web_page_name = "Kwejk"
         self.web_page_url = "http://kwejk.pl"
-        self.memes_per_page = 8
-
+        self.path_on_disk = path_on_disk
 
     def __extract_links_only_to_memes(self, urls):
         """
@@ -85,15 +105,16 @@ class KwejkParser(ParsersInterface):
                 ret.append(url)
         return ret
 
-
     def download_memes(self):
         super(KwejkParser, self)._raw_and_pretty_html_setter()
         categories = self._get_by_tag_and_class("a", "category")
         tags = self._get_by_tag_and_class("div", "tag-list")
         authors = self._get_by_tag_and_class("span", "name")
         urls_to_memes = self.__extract_links_only_to_memes(self._get_attribute_from_tag("img", "src"))
-        print("a")
-
-
-kp = KwejkParser()
-kp.download_memes()
+        splited_urls = self._split_url(urls_to_memes, "/")
+        ids = []
+        for splited in splited_urls:
+            ids.append(splited[-1][:-4])  # [:-4] means we dont want to have ".jpg" in id of meme
+        memes_count = len(ids)
+        for i in range(memes_count):
+            self._save_image_from_url(urls_to_memes[i], ids[i] + ".jpg")

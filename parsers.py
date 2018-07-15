@@ -1,7 +1,10 @@
+from datetime import datetime
+import os
 from abc import ABCMeta, abstractmethod
 from bs4 import BeautifulSoup
 from html_getter import HtmlGetter
 from error_logger import Logger
+from meme_info import MemeInfo
 
 class ParsersInterface:
     """
@@ -31,10 +34,10 @@ class ParsersInterface:
         Raw_html is raw string.
         Pretty_html is BeautifulSoup object.
         """
-        self.raw_html = HtmlGetter.simple_get(self.web_page_url)
-        Logger.CHECK_IF_NONE(self.raw_html)
-        self.pretty_html = BeautifulSoup(self.raw_html, 'html.parser')
-        Logger.CHECK_IF_NONE(self.pretty_html)
+        self._raw_html = HtmlGetter.simple_get(self._web_page_url)
+        Logger.CHECK_IF_NONE(self._raw_html)
+        self._pretty_html = BeautifulSoup(self._raw_html, 'html.parser')
+        Logger.CHECK_IF_NONE(self._pretty_html)
 
     def _get_by_tag_and_class(self, tag, class_):
         """
@@ -45,7 +48,7 @@ class ParsersInterface:
         :return: Array of values matching tag and class_. (Value is text between tags: <..> ... </..>)
         """
         out = []
-        for value in self.pretty_html.find_all(tag, class_=class_):
+        for value in self._pretty_html.find_all(tag, class_=class_):
             out.append(value.text)
         return out
 
@@ -58,15 +61,22 @@ class ParsersInterface:
         :return: Array of attribute values of matching tag.
         """
         out = []
-        for attr in self.pretty_html.find_all(tag):
+        for attr in self._pretty_html.find_all(tag):
             if attr[attribute] != 0:
                 out.append(attr[attribute])
         return out
 
-    def _save_image_from_url(self, web_url, file_name):
-        image_raw = HtmlGetter.simple_get(web_url)
-        with open(self.path_on_disk + "\\" + file_name, 'wb') as f:
+    def _save_image_from_url(self, meme_info):
+        image_raw = HtmlGetter.simple_get(meme_info.url_to_meme)
+        now = datetime.now()
+        path_to_save = self._path_on_disk + os.sep + self._web_page_name + os.sep \
+            + str(now.year) + os.sep + str(now.month)
+        if not os.path.exists(path_to_save):
+            os.makedirs(path_to_save)
+        path_to_save = path_to_save + os.sep + meme_info.id
+        with open(path_to_save + ".jpg", 'wb') as f:
             f.write(image_raw)
+        meme_info.save_json(path_to_save)
 
     def _split_url(self, memes_urls, character):
         """
@@ -86,9 +96,9 @@ class KwejkParser(ParsersInterface):
     Kwejk parser.
     """
     def __init__(self, path_on_disk):
-        self.web_page_name = "Kwejk"
-        self.web_page_url = "http://kwejk.pl"
-        self.path_on_disk = path_on_disk
+        self._web_page_name = "Kwejk"
+        self._web_page_url = "http://kwejk.pl"
+        self._path_on_disk = path_on_disk
 
     def __extract_links_only_to_memes(self, urls):
         """
@@ -105,10 +115,17 @@ class KwejkParser(ParsersInterface):
                 ret.append(url)
         return ret
 
+    def __make_array_from_tags(self, tags):
+        for i in range(len(tags)):
+            tags[i] = tags[i].split("\n")
+            del tags[i][0]
+            del tags[i][-1]
+
     def download_memes(self):
         super(KwejkParser, self)._raw_and_pretty_html_setter()
         categories = self._get_by_tag_and_class("a", "category")
         tags = self._get_by_tag_and_class("div", "tag-list")
+        self.__make_array_from_tags(tags)
         authors = self._get_by_tag_and_class("span", "name")
         urls_to_memes = self.__extract_links_only_to_memes(self._get_attribute_from_tag("img", "src"))
         splited_urls = self._split_url(urls_to_memes, "/")
@@ -117,4 +134,15 @@ class KwejkParser(ParsersInterface):
             ids.append(splited[-1][:-4])  # [:-4] means we dont want to have ".jpg" in id of meme
         memes_count = len(ids)
         for i in range(memes_count):
-            self._save_image_from_url(urls_to_memes[i], ids[i] + ".jpg")
+            meme_info = MemeInfo(
+                "title",
+                ids[i],
+                self._web_page_name,
+                urls_to_memes[i],
+                authors[i],
+                categories[i],
+                tags[i]
+            )
+            self._save_image_from_url(meme_info)
+
+

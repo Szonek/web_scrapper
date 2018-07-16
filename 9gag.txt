@@ -1,0 +1,34 @@
+schemat struktury JSONa otrzymywanego po wysłaniu requesta
+https://9gag.com/v1/group-posts/group/default/type/hot
+
+
+meta
+    timestamp
+    status (Success)
+    sid
+data
+    posts []
+        id
+        url
+        title
+        type (Photo, Animated)
+        nsfw (0/1)
+        upVoteCount
+        hasLongPostCover (0/1)
+        images []
+            image700
+                width (700)
+                height
+                url (jpg)
+                webpUrl (webp)
+            image460
+        sourceDomain
+        sourceUrl
+        commentsCount
+        sections [] (funny, football, gif)
+        tags []
+            key (tag name)
+            url (/tag/tag-name)
+        descriptionHtml
+    tags []
+    nextCursor (after=aExy4mp%2Ca0Kz3Wq%2Ca0Kz3BB&c=20)

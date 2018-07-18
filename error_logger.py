@@ -24,6 +24,13 @@ class Logger:
             sys.exit(1)
 
     @staticmethod
+    def is_istance(obj, class_type):
+        if isinstance(obj, class_type):
+            pass
+        else:
+            Logger.log_error(str(obj), "is not type: ", str(class_type))
+
+    @staticmethod
     def __advanced_log(message):
         """
         Automatically log the current function details.

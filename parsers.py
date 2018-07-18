@@ -1,10 +1,9 @@
-from datetime import datetime
-import os
 from abc import ABCMeta, abstractmethod
 from bs4 import BeautifulSoup
 from html_getter import HtmlGetter
 from error_logger import Logger
 from meme_info import MemeInfo
+
 
 class ParsersInterface:
     """
@@ -16,7 +15,6 @@ class ParsersInterface:
     def __init__(self, name, url, path_on_disk):
         self._web_page_name = name
         self._web_page_url = url
-        self._path_on_disk = path_on_disk
         self._raw_html = None
         self._pretty_html = None
 
@@ -66,18 +64,6 @@ class ParsersInterface:
                 out.append(attr[attribute])
         return out
 
-    def _save_image_from_url(self, meme_info):
-        image_raw = HtmlGetter.simple_get(meme_info.url_to_meme)
-        now = datetime.now()
-        path_to_save = self._path_on_disk + os.sep + self._web_page_name + os.sep \
-            + str(now.year) + os.sep + str(now.month)
-        if not os.path.exists(path_to_save):
-            os.makedirs(path_to_save)
-        path_to_save = path_to_save + os.sep + meme_info.id
-        with open(path_to_save + ".jpg", 'wb') as f:
-            f.write(image_raw)
-        meme_info.save_json(path_to_save)
-
     def _split_url(self, memes_urls, character):
         """
         Split url by "/" character.
@@ -95,10 +81,9 @@ class KwejkParser(ParsersInterface):
     """
     Kwejk parser.
     """
-    def __init__(self, path_on_disk):
+    def __init__(self):
         self._web_page_name = "Kwejk"
         self._web_page_url = "http://kwejk.pl"
-        self._path_on_disk = path_on_disk
 
     def __extract_links_only_to_memes(self, urls):
         """
@@ -115,34 +100,75 @@ class KwejkParser(ParsersInterface):
                 ret.append(url)
         return ret
 
-    def __make_array_from_tags(self, tags):
+    def __make_array_from_toolbar(self, tags):
+        """
+        Process tags so they are useful.
+        :param tags: Tags parsed from the kwejk.
+        """
         for i in range(len(tags)):
             tags[i] = tags[i].split("\n")
             del tags[i][0]
             del tags[i][-1]
 
+    def __get_gifs_idx(self, categories):
+        """
+        Currently detecting GIF is based on category.
+        :param categories: Array of categories.
+        :return: array of idxs of gifs
+        """
+        gifs_idxs = []
+        for idx, cat in enumerate(categories):
+            if cat == "GIF":
+                gifs_idxs.append(idx)
+        return gifs_idxs
+
+    def set_page(self, page_number=0):
+        """
+        If user wants to download history of Kwejk he should set number of the page. (default is 0 -> newest)
+        :param page_number: Number of the page of kwejk web site.
+        """
+        base_url = "http://kwejk.pl"
+        if page_number == 0:
+            self._web_page_url = base_url
+        else:
+            strona_str = "/strona/"
+            self._web_page_url = base_url + strona_str + str(page_number)
+
     def download_memes(self):
         super(KwejkParser, self)._raw_and_pretty_html_setter()
-        categories = self._get_by_tag_and_class("a", "category")
-        tags = self._get_by_tag_and_class("div", "tag-list")
-        self.__make_array_from_tags(tags)
+        toolbars = self._get_by_tag_and_class("div", "toolbar")
+        self.__make_array_from_toolbar(toolbars)
+        categories = []
+        tags = []
+        for toolbar in toolbars:
+            categories.append(toolbar[0])
+            tags.append(toolbar[2:-1])
+        gifs_idxs = self.__get_gifs_idx(categories)
+
         authors = self._get_by_tag_and_class("span", "name")
-        urls_to_memes = self.__extract_links_only_to_memes(self._get_attribute_from_tag("img", "src"))
-        splited_urls = self._split_url(urls_to_memes, "/")
+        if len(authors) != len(categories):  # some pages have one additional author (its best comment author)
+            del authors[-1]
+        for gif_idx in gifs_idxs:  # we need to delete info about gif
+            del tags[gif_idx]
+            del authors[gif_idx]
+            del categories[gif_idx]
+
+        urls_to_imgs = self.__extract_links_only_to_memes(self._get_attribute_from_tag("img", "src"))
+        splited_urls = self._split_url(urls_to_imgs, "/")
         ids = []
         for splited in splited_urls:
             ids.append(splited[-1][:-4])  # [:-4] means we dont want to have ".jpg" in id of meme
         memes_count = len(ids)
         for i in range(memes_count):
             meme_info = MemeInfo(
-                "title",
-                ids[i],
-                self._web_page_name,
-                urls_to_memes[i],
-                authors[i],
-                categories[i],
-                tags[i]
+                title="title",
+                id=ids[i],
+                web_page_name=self._web_page_name,
+                url_to_img=urls_to_imgs[i],
+                author=authors[i],
+                category=[categories[i]],
+                tags=tags[i]
             )
-            self._save_image_from_url(meme_info)
+            meme_info.save_on_disk()
 
 

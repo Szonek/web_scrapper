@@ -4,7 +4,7 @@ from error_logger import Logger
 from datetime import date, datetime
 from html_getter import HtmlGetter
 import os
-
+from config_reader import ConfigParser
 
 class Utils:
 
@@ -68,16 +68,24 @@ class MemeInfo:
         with open(path + ".json", 'w') as f:
             json.dump(self.__json, f, sort_keys=True, indent=4, ensure_ascii=False)
 
+    def __get_path_to_save(self):
+        config_parser = ConfigParser()
+        storage_dir = config_parser.path_on_disk_for_memes()
+        web_folders = config_parser.make_folders_for_meme_pages()
+        if web_folders:
+            storage_dir = storage_dir + os.sep + self.web_page_name
+        date_folders = config_parser.make_folders_for_meme_download_date()
+        if date_folders:
+            now = datetime.now()
+            storage_dir = storage_dir + os.sep + str(now.year) + os.sep + str(now.month) + os.sep + str(now.day)
+        if not os.path.exists(storage_dir):
+            os.makedirs(storage_dir)
+        storage_dir = storage_dir + os.sep + self.id
+        return storage_dir
+
     def save_on_disk(self):
-        storage_dir = "C:\\Users\\szymon\\Desktop\memestok\\temp_folder"  # TODO: make config file and get rid of this
-        # storage_dir = "c:/xampp/htdocs/memes_storage"
         image_raw = HtmlGetter.simple_get(self.url_to_img)
-        now = datetime.now()
-        path_to_save = storage_dir + os.sep + self.web_page_name + os.sep \
-            + str(now.year) + os.sep + str(now.month) + os.sep + str(now.day)
-        if not os.path.exists(path_to_save):
-            os.makedirs(path_to_save)
-        path_to_save = path_to_save + os.sep + self.id
+        path_to_save = self.__get_path_to_save()
         with open(path_to_save + ".jpg", 'wb') as f:
             f.write(image_raw)
         self.__save_json(path_to_save)

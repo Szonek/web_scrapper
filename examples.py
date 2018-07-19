@@ -1,6 +1,15 @@
 import parsers
 from request_scrapper import NineGagParser
+from config_reader import ConfigParser
 
+cp = ConfigParser()
+print(cp.project_name())
+print(cp.path_on_disk_for_memes())
+print(cp.download_images())
+print(cp.download_jsons())
+print(cp.make_folders_for_meme_download_date())
+print(cp.make_folders_for_meme_pages())
+print(cp.tests_can_download_memes())
 
 
 # DELETE THIS

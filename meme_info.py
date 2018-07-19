@@ -7,7 +7,9 @@ import os
 from config_reader import ConfigParser
 
 class Utils:
-
+    """
+    Just util functions, used in MemeInfo.
+    """
     @staticmethod
     def calc_meme_hash(id):
         return hashlib.sha224(id).hexdigest()
@@ -63,12 +65,19 @@ class MemeInfo:
             pass
 
     def __save_json(self, path):
+        """
+        Saves jsons to concrete path.
+        :return:
+        """
         if self.__json_calculated is False:
             self.__calc_json()
         with open(path + ".json", 'w') as f:
             json.dump(self.__json, f, sort_keys=True, indent=4, ensure_ascii=False)
 
     def __get_path_to_save(self):
+        """
+        Prepare storage dir, based on config.ini
+        """
         config_parser = ConfigParser()
         storage_dir = config_parser.path_on_disk_for_memes()
         web_folders = config_parser.make_folders_for_meme_pages()
@@ -84,6 +93,9 @@ class MemeInfo:
         return storage_dir
 
     def save_on_disk(self):
+        """
+        Saves meme and its json on disk.
+        """
         image_raw = HtmlGetter.simple_get(self.url_to_img)
         path_to_save = self.__get_path_to_save()
         with open(path_to_save + ".jpg", 'wb') as f:

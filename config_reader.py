@@ -3,6 +3,17 @@ import sys
 import inspect
 
 class ConfigParser:
+    """
+    Reader config.ini from utils folder.
+
+    Example of how to add new config:
+    1. Add new config to config.ini:
+    new_config_options = abc  (also can be int 0 or 1)
+    2. Please add function using this template:
+    def new_config_options(self);
+        return self._config[self.__get_func_name()]
+    3. Done.
+    """
     def __init__(self):
         self._path = os.path.dirname(os.path.realpath(sys.argv[0])) + os.sep + "utils" + os.sep + "config.ini"
         with open(self._path) as f:

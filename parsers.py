@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 from html_getter import HtmlGetter
 from error_logger import Logger
 from meme_info import MemeInfo
+import inspect
+import sys
+import importlib
 
 
 class ParsersInterface:
@@ -12,7 +15,7 @@ class ParsersInterface:
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, url, path_on_disk):
+    def __init__(self, name, url):
         self._web_page_name = name
         self._web_page_url = url
         self._raw_html = None
@@ -80,6 +83,9 @@ class ParsersInterface:
 class KwejkParser(ParsersInterface):
     """
     Kwejk parser.
+    Available methods:
+    1. Set_page() -> sets page, which will be parsed (if not used: newest page is used)
+    2. download_memes() -> download memes from sat page.
     """
     def __init__(self):
         self._web_page_name = "Kwejk"
@@ -172,3 +178,49 @@ class KwejkParser(ParsersInterface):
             meme_info.save_on_disk()
 
 
+
+
+
+class TestParser(ParsersInterface):
+    """
+    Just for tests!
+    """
+    def __init__(self):
+        self._web_page_name = "TestName"
+        self._web_page_url = "test_url"
+
+    def download_memes(self):
+        print("downloading meme for TestParser")
+
+
+class AllParsers:
+    """
+    It create all parsers, which are given in the constructor argument.
+    No need to update this class, when adding new parser.
+    !!! All parsers need to implement download_memes() method and have name <WebPageName>Parser !!!
+    """
+    def __init__(self, parsers_names=[]):
+        self.parsers_names = [name + "Parser" for name in parsers_names]
+        self.parser_objs = []
+        self.__create_parser()
+
+    def __create_parser(self):
+        """
+        Creates instances of parsers, based on the given names in the constructor.
+        """
+        is_class_member = lambda member: inspect.isclass(member) and member.__module__ == __name__
+        classes = inspect.getmembers(sys.modules[__name__], is_class_member)
+
+        get_class = lambda x: globals()[x]
+        for parser, _ in classes:
+            if any(parser in p_name for p_name in self.parsers_names):
+                c = get_class(parser)
+                inst = c()
+                self.parser_objs.append(inst)
+
+    def download_memes(self):
+        """
+        Download memes from all created parsers.
+        """
+        for parser in self.parser_objs:
+            parser.download_memes()

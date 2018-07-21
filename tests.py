@@ -24,14 +24,14 @@ class WebScrapperTester(unittest.TestCase):
         self.assertEqual(real_outputs, reference_outputs)
 
     def test_basic_kwejk(self):
-        kwejk_parser = parsers.KwejkParser()  # we will not download memes so we give dummy path
-        name = kwejk_parser.web_page_name
-        url = kwejk_parser.web_page_url
+        kwejk_parser = parsers.KwejkParser()
+        name = kwejk_parser._web_page_name
+        url = kwejk_parser._web_page_url
         self.assertEqual(name, "Kwejk")
         self.assertEqual(url, "http://kwejk.pl")
 
-    def test_basic_kwejk(self):
-        kwejk_parser = parsers.KwejkParser()  # we will not download memes so we give dummy path
+    def test_kwejk_download(self):
+        kwejk_parser = parsers.KwejkParser()
         kwejk_parser.download_memes()
         run_complete = True
         self.assertTrue(run_complete)

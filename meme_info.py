@@ -5,6 +5,8 @@ from datetime import date, datetime
 from html_getter import HtmlGetter
 import os
 from config_reader import ConfigParser
+import inspect
+
 
 class Utils:
     """
@@ -97,6 +99,11 @@ class MemeInfo:
         Saves meme and its json on disk.
         """
         image_raw = HtmlGetter.simple_get(self.url_to_img)
+        script_name = inspect.stack()[2][3]
+        if "test_" in script_name[0:len("test_")]:
+            cp = ConfigParser()
+            if cp.tests_can_download_memes() is False:
+                return
         path_to_save = self.__get_path_to_save()
         with open(path_to_save + ".jpg", 'wb') as f:
             f.write(image_raw)

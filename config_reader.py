@@ -15,7 +15,7 @@ class ConfigParser:
     3. Done.
     """
     def __init__(self):
-        self._path = os.path.dirname(os.path.realpath(sys.argv[0])) + os.sep + "utils" + os.sep + "config.ini"
+        self._path = os.path.dirname(os.path.realpath(__file__)) + os.sep + "utils" + os.sep + "config.ini"
         with open(self._path) as f:
             content = f.readlines()
         content = [x.strip() for x in content]
@@ -27,7 +27,7 @@ class ConfigParser:
 
     def __parse_key(self, key):
         try:
-            return int(key)
+            return bool(int(key))
         except ValueError:
             return str(key)
 

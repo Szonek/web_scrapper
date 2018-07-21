@@ -154,7 +154,7 @@ class KwejkParser(ParsersInterface):
         authors = self._get_by_tag_and_class("span", "name")
         if len(authors) != len(categories):  # some pages have one additional author (its best comment author)
             del authors[-1]
-        for gif_idx in gifs_idxs:  # we need to delete info about gif
+        for gif_idx in reversed(gifs_idxs):  # we need to delete info about gif
             del tags[gif_idx]
             del authors[gif_idx]
             del categories[gif_idx]

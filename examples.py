@@ -1,5 +1,4 @@
 import parsers
-from request_parsers import NineGagParser
 from config_reader import ConfigParser
 
 cp = ConfigParser()
@@ -12,23 +11,16 @@ print(cp.make_folders_for_meme_pages())
 print(cp.tests_can_download_memes())
 
 
-# DELETE THIS
-#storage_dir = "C:\\Users\\szymon\\Desktop\memestok\\temp_folder"
-#storage_dir = "c:/xampp/htdocs/memes_storage"
-#
 
-# No need to update AllParsers code, when added new parser.
-# New parser need to be added to parsers.py and have name <WebPageName>Parser
-#ap = parsers.AllParsers(['Kwejk', 'Test'])
-#ap.download_memes()
 
+ap = parsers.AllParsers(['Kwejk', 'NineGag'])
+ap.download_memes()
+
+
+# ONLY KWEJK PARSER
 #kwejk_parser = parsers.KwejkParser()
 #kwejk_parser.download_memes()
 
-ninegag_parser = NineGagParser()
-ninegag_parser.download_memes()
-
-#NineGagParser.downloadMemes(storage_dir)  # PLEASE DELETE STROAGE_DIR ARGUMENT
-# TODO: PLEASE MOVE NineGagParser to parsers.py (between kwejk parser and AllParsers class)
-# TODO: NAME CONVENTION!
-# TODO: MAKE BASE CLASS WITH VIRTUAL METHOD download_memes() FOR THIS TYPE OF PARSER. (like its done for kwejk_praser now)
+# ONLY 9GAG PARSER
+#ninegag_parser = NineGagParser()
+#ninegag_parser.download_memes()

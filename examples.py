@@ -1,5 +1,5 @@
 import parsers
-from request_scrapper import NineGagParser
+from request_parsers import NineGagParser
 from config_reader import ConfigParser
 
 cp = ConfigParser()
@@ -22,10 +22,11 @@ print(cp.tests_can_download_memes())
 #ap = parsers.AllParsers(['Kwejk', 'Test'])
 #ap.download_memes()
 
-kwejk_parser = parsers.KwejkParser()
-kwejk_parser.download_memes()
+#kwejk_parser = parsers.KwejkParser()
+#kwejk_parser.download_memes()
 
-
+ninegag_parser = NineGagParser()
+ninegag_parser.download_memes()
 
 #NineGagParser.downloadMemes(storage_dir)  # PLEASE DELETE STROAGE_DIR ARGUMENT
 # TODO: PLEASE MOVE NineGagParser to parsers.py (between kwejk parser and AllParsers class)

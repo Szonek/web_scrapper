@@ -1,5 +1,6 @@
 import parsers
 from config_reader import ConfigParser
+from tests import WebScrapperTester
 
 cp = ConfigParser()
 print(cp.project_name())
@@ -13,9 +14,8 @@ print(cp.tests_can_download_memes())
 
 
 
-ap = parsers.AllParsers(['Kwejk', 'NineGag'])
-ap.download_memes()
-
+#tester = WebScrapperTester()
+#tester.test_ninegag_download()
 
 # ONLY KWEJK PARSER
 #kwejk_parser = parsers.KwejkParser()

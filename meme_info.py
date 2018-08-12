@@ -44,7 +44,7 @@ class MemeInfo:
         self.url_to_meme = url_to_meme  # str   its url to page with meme (with comments etc)
         self.author_id = author  # str (author of first meme)
         self.category = category  # array of str
-        self.tags = tags  # array of str
+        self.tags = self.__parse_tags(tags)  # array of str
         self.histogram_hash = ""  # str
         self.__json = {}
         self.__json_calculated = False
@@ -108,4 +108,12 @@ class MemeInfo:
         with open(path_to_save + ".jpg", 'wb') as f:
             f.write(image_raw)
         self.__save_json(path_to_save)
+
+
+    def __parse_tags(self, tags):
+        """
+        Remove whitespaces, special characters and convert tags to lowercase.
+        """
+        return list(map(lambda tag_name: ''.join(list(filter(str.isalnum, tag_name.lower()))), tags))
+
 

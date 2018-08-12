@@ -1,6 +1,8 @@
 import unittest
 from html_getter import HtmlGetter
 from bs4 import BeautifulSoup
+import os
+from config_reader import ConfigParser
 import parsers
 
 
@@ -35,6 +37,16 @@ class WebScrapperTester(unittest.TestCase):
         kwejk_parser.download_memes()
         run_complete = True
         self.assertTrue(run_complete)
+
+    def test_ninegag_download(self):
+        config = ConfigParser()
+        storage_path = config.path_on_disk_for_memes()
+        ninegag_parser = parsers.NineGagParser(is_test=1)
+        ninegag_parser.download_memes()
+        websites_dirs = os.walk(storage_path)
+        # check if 9gag, year, month folders exist
+        # find newest downloaded meme
+        # check if all json object attributes exist
 
 
 if __name__ == '__main__':

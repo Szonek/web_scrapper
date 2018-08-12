@@ -201,10 +201,11 @@ class KwejkParser(ParsersInterface):
 
 class NineGagParser(RequestParserInterface):
 
-    def __init__(self):
+    def __init__(self, is_test=0):
         self._web_page_name = "9gag"
         self._web_page_url = "https://9gag.com"
         self._request_url_hot = "https://9gag.com/v1/group-posts/group/default/type/hot"
+        self._is_test = is_test
 
     def download_memes(self):
         try:
@@ -215,7 +216,7 @@ class NineGagParser(RequestParserInterface):
                 return
             for post in response_json['data']['posts']:
                 # skip gifs and nsfw
-                if post['type'] != 'Photo' or post['nsfw'] == 1:
+                if (not self._is_test and post['type'] != 'Photo') or post['nsfw'] == 1:
                     continue
                 # skip if there is no image url
                 if 'image700' not in post['images']:
